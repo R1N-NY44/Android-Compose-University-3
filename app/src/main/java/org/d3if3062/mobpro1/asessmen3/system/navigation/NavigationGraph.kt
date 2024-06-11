@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import org.d3if3062.mobpro1.asessmen3.system.database.SystemViewModel
 import org.d3if3062.mobpro1.asessmen3.ui.screen.ScreenContent
 
 @Composable
@@ -17,7 +18,8 @@ fun NavigationGraph(navController: NavHostController) {
         composable(route = Screen.Base.route) {
             ScreenContent(
                 name = Screen.Base.route,
-                onClick = { }
+                onClick = { },
+                viewModel = SystemViewModel()
             )
         }
 //        composable(route = Screen.History.route) {

@@ -98,6 +98,9 @@ dependencies {
     // Adding datastore for saving user data
     implementation("androidx.datastore:datastore-preferences:1.0.0")
 
+    // lifecycle-livedata for LiveData support in Compose
+    implementation ("androidx.compose.runtime:runtime-livedata:1.6.4")
+
     // Add vanniktech for image cropper and image picker
     implementation("com.vanniktech:android-image-cropper:4.5.0")
 

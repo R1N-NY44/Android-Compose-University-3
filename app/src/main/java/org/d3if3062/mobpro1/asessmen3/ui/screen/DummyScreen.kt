@@ -9,9 +9,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import org.d3if3062.mobpro1.asessmen3.system.database.SystemViewModel
 
 @Composable
-fun ScreenContent(name: String, onClick: () -> Unit) {
+fun ScreenContent(name: String, onClick: () -> Unit, viewModel: SystemViewModel) {
+
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
