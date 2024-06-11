@@ -57,8 +57,6 @@ fun BaseApp(
     context: Context = LocalContext.current,
     systemViewModel: SystemViewModel = viewModel()
 ) {
-    val apiProfile by systemViewModel.profileData.observeAsState(initial = emptyList())
-
     val dataStore = SettingsDataStore(context)
     val userStore = UserDataStore(context)
     val appTheme by dataStore.layoutFlow.collectAsState(true)
@@ -85,17 +83,6 @@ fun BaseApp(
             bottomBar = {
                 //BottomBarWidget(navController)
             },
-            floatingActionButton = {
-                IconButton(
-                    onClick = {
-                        apiProfile?.firstOrNull()?.let { profile ->
-                            systemViewModel.sendChat(profile, "test")
-                        }
-                    }
-                ) {
-
-                }
-            }
 
 
         ) { padding ->
@@ -121,10 +108,6 @@ fun BaseApp(
                 }
             }
 
-            // login user to api
-            if (user.email.isNotEmpty()) {
-                systemViewModel.LogIn(user)
-            }
         }
     }
 }
