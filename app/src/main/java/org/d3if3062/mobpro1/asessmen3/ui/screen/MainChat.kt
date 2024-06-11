@@ -48,13 +48,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.d3if3062.mobpro1.asessmen3.R
 import org.d3if3062.mobpro1.asessmen3.system.database.SystemViewModel
+import org.d3if3062.mobpro1.asessmen3.system.database.model.ApiProfile
 import org.d3if3062.mobpro1.asessmen3.system.database.model.ChatList
 import org.d3if3062.mobpro1.asessmen3.system.network.ChatStatus
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PublicChat(systemViewModel: SystemViewModel) {
-    val apiProfile by systemViewModel.profileData.observeAsState(initial = emptyList())
+fun PublicChat(systemViewModel: SystemViewModel, apiProfile: List<ApiProfile>) {
+//    val apiProfile by systemViewModel.profileData.observeAsState(initial = emptyList())
     var textState by rememberSaveable { mutableStateOf("") }
     Scaffold(
         bottomBar = {
@@ -84,9 +85,7 @@ fun PublicChat(systemViewModel: SystemViewModel) {
                     // IconButton with 15% width each
                     IconButton(
                         onClick = {
-                            apiProfile?.firstOrNull()?.let { profile ->
-                                systemViewModel.sendChat(profile, textState)
-                            }
+                            /* TODO: Send message */
                         },
                     ) {
                         Icon(
@@ -95,7 +94,12 @@ fun PublicChat(systemViewModel: SystemViewModel) {
                         )
                     }
                     IconButton(
-                        onClick = { /* TODO: Send message */ },
+                        onClick = {
+                            apiProfile.firstOrNull()?.let { profile ->
+                                systemViewModel.sendChat(profile, textState)
+                            }
+                            textState = ""
+                        },
                     ) {
                         Icon(imageVector = Icons.Filled.Send, contentDescription = "Send Message")
                     }
@@ -105,7 +109,9 @@ fun PublicChat(systemViewModel: SystemViewModel) {
     ) { padding ->
         Modifier.padding(padding)
         ChatContent(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding),
             systemViewModel = systemViewModel
         )
     }
@@ -117,7 +123,21 @@ fun ChatContent(modifier: Modifier, systemViewModel: SystemViewModel) {
     val status by systemViewModel.chatStatus.collectAsState()
     val chatData by systemViewModel.chatData.observeAsState(initial = emptyList())
 
-    when (status) {
+    LazyVerticalGrid(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(4.dp),
+        columns = GridCells.Fixed(1)
+    ) {
+        items(chatData) {
+            Row {
+            Text(text = it.name + ": ", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Text(text = it.text, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            }
+        }
+    }
+
+    /*when (status) {
         ChatStatus.LOADING -> {
             Box(
                 modifier = Modifier.fillMaxSize(),
@@ -149,7 +169,7 @@ fun ChatContent(modifier: Modifier, systemViewModel: SystemViewModel) {
             ) {
                 Text(text = stringResource(id = R.string.error))
                 Button(
-                    onClick = { /*systemViewModel.retrieveData()*/ },
+                    onClick = { *//*systemViewModel.retrieveData()*//* },
                     modifier = Modifier.padding(8.dp),
                     contentPadding = PaddingValues(horizontal = 32.dp, vertical = 16.dp)
                 ) {
@@ -157,7 +177,7 @@ fun ChatContent(modifier: Modifier, systemViewModel: SystemViewModel) {
                 }
             }
         }
-    }
+    }*/
 
 }
 
@@ -165,5 +185,5 @@ fun ChatContent(modifier: Modifier, systemViewModel: SystemViewModel) {
 @Preview(uiMode = Configuration.UI_MODE_NIGHT_YES, showBackground = true)
 @Composable
 fun PublicChatPreview() {
-    PublicChat(systemViewModel = SystemViewModel())
+    PublicChat(systemViewModel = SystemViewModel(), apiProfile = emptyList())
 }

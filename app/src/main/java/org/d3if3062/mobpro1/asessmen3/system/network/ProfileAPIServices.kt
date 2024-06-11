@@ -22,7 +22,7 @@ private val retrofit = Retrofit.Builder()
     .build()
 
 data class ApiResponse(
-    val resultsProfile: List<ApiProfile>
+    val results: List<ApiProfile>
 )
 
 interface ChatProfileServices {

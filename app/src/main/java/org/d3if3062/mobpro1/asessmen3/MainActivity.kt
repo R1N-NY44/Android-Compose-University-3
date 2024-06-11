@@ -88,7 +88,7 @@ fun BaseApp(
             bottomBar = {
                 //BottomBarWidget(navController)
             },
-            floatingActionButton = {
+            /*floatingActionButton = {
                 IconButton(
                     onClick = {
                         apiProfile?.firstOrNull()?.let { profile ->
@@ -98,12 +98,12 @@ fun BaseApp(
                 ) {
                     Icon(imageVector = Icons.Filled.Send, contentDescription = "Send Message")
                 }
-            }
+            }*/
 
 
         ) { padding ->
             Modifier.padding(padding)
-            NavigationGraph(navController)
+            NavigationGraph(navController, apiProfile)
 
             // LaunchedEffect to handle sign-in if needed
             LaunchedEffect(showDialog) {
