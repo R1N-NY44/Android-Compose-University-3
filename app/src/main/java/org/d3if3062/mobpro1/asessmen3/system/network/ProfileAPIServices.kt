@@ -22,7 +22,7 @@ private val retrofit = Retrofit.Builder()
     .build()
 
 data class ApiResponse(
-    val results: List<ApiProfile>
+    val resultsProfile: List<ApiProfile>
 )
 
 interface ChatProfileServices {
@@ -31,6 +31,7 @@ interface ChatProfileServices {
     @POST("AddTest.php")
     suspend fun addUser(
         @Field("email") email: String,
+        @Field("name") name: String,
         @Field("photoUrl") photoUrl: String
     ): ApiResponse
 
@@ -50,5 +51,3 @@ object ChatProfileAPI {
         retrofit.create(ChatProfileServices::class.java)
     }
 }
-
-enum class chatProfileStatus { LOADING, SUCCESS, FAILED }

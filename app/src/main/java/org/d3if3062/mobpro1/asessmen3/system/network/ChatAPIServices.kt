@@ -2,7 +2,6 @@ package org.d3if3062.mobpro1.asessmen3.system.network
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import org.d3if3062.mobpro1.asessmen3.system.database.model.ApiProfile
 import org.d3if3062.mobpro1.asessmen3.system.database.model.ChatList
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -23,7 +22,7 @@ private val retrofit = Retrofit.Builder()
     .build()
 
 data class ChatResponse(
-    val results: List<ChatList>
+    val resultsChat: List<ChatList>
 )
 interface ChatServices {
 
@@ -31,7 +30,8 @@ interface ChatServices {
     @POST("AddChat.php")
     suspend fun addChat(
         @Field("user_id") userId: String,
-        @Field("photoUrl") photoUrl: String?,
+        @Field("name") name: String,
+        @Field("photoUrl") photoUrl: String,
         @Field("text") text: String?,
         @Field("image") image: String?
     ): ChatResponse

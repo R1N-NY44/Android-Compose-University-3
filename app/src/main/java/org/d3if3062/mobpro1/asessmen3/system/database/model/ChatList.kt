@@ -4,6 +4,7 @@ data class ChatList(
     //user indentifier
     val id: String = "",
     val user_id: String = "",
+    val name: String = "",
     val photoUrl: String = "",
     val date: String = "",
 
