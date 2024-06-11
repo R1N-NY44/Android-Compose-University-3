@@ -101,9 +101,9 @@ fun BaseApp(
             }*/
 
 
-        ) { padding ->
-            Modifier.padding(padding)
-            NavigationGraph(navController, apiProfile)
+        ) { paddingValues ->
+            Modifier.padding(paddingValues)
+            NavigationGraph(navController, apiProfile, modifier = Modifier.padding(paddingValues))
 
             // LaunchedEffect to handle sign-in if needed
             LaunchedEffect(showDialog) {

@@ -37,7 +37,7 @@ class SystemViewModel : ViewModel() {
         viewModelScope.launch {
             while (true) {
                 getChat()
-                delay(3000) // Poll every 5 seconds
+                delay(5000) // Poll every 5 seconds
             }
         }
     }
