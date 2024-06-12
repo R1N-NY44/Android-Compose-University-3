@@ -123,9 +123,9 @@ fun PublicChat(systemViewModel: SystemViewModel, apiProfile: List<ApiProfile>, m
 
 @Composable
 fun ChatContent(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     systemViewModel: SystemViewModel,
-    apiProfile: List<ApiProfile>
+    apiProfile: List<ApiProfile>? = null
 ) {
     val status by systemViewModel.chatStatus.collectAsState()
     val chatData by systemViewModel.chatData.observeAsState(initial = emptyList())
@@ -141,16 +141,13 @@ fun ChatContent(
         reverseLayout = true
     ) {
         items(chatData) { chat ->
-            if (chat.name == apiProfile.first().name) {
-                    SentMessageBox(chat)
+            if (apiProfile != null && apiProfile.isNotEmpty() && chat.name == apiProfile.first().name) {
+                SentMessageBox(chat)
             } else {
                 ReceivedMessageBox(chat)
             }
-//            ReceivedMessageBox(chat)
-//            ChatBox(chat)
         }
     }
-    ///////////////////////////////////////////////////////////////////////
 }
 
 

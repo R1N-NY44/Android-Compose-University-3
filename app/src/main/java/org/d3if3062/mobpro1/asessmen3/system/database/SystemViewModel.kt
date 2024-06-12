@@ -56,7 +56,7 @@ class SystemViewModel : ViewModel() {
         }
     }
     ////////////////////////////////////////////////////////////////////////////////////////
-    private suspend fun getChat() {
+    suspend fun getChat() {
         withContext(Dispatchers.IO) {
             chatStatus.value = ChatStatus.LOADING
             try {
