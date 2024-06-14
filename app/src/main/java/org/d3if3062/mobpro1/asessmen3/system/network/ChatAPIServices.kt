@@ -2,13 +2,16 @@ package org.d3if3062.mobpro1.asessmen3.system.network
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import org.d3if3062.mobpro1.asessmen3.system.database.model.ChatList
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
-import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.Part
 
 private const val BASE_URL = "https://fenris-api-host.000webhostapp.com/files/"
 
@@ -24,16 +27,16 @@ private val retrofit = Retrofit.Builder()
 data class ChatResponse(
     val results: List<ChatList>
 )
-interface ChatServices {
 
-    @FormUrlEncoded
+interface ChatServices {
+    @Multipart
     @POST("addChat.php")
     suspend fun addChat(
-        @Field("user_id") userId: String,
-        @Field("name") name: String,
-        @Field("photoUrl") photoUrl: String,
-        @Field("text") text: String?,
-        @Field("image") image: String?
+        @Part("user_id") userId: RequestBody,
+        @Part("name") name: RequestBody,
+        @Part("photoUrl") photoUrl: RequestBody,
+        @Part("text") text: RequestBody?,
+        @Part image: MultipartBody.Part?
     ): ChatResponse
 
     @GET("getChat.php")
@@ -43,6 +46,9 @@ interface ChatServices {
 object ChatAPI {
     val retrofitService: ChatServices by lazy {
         retrofit.create(ChatServices::class.java)
+    }
+    fun imgUrl(imageId: String): String {
+        return "$BASE_URL$imageId"
     }
 }
 

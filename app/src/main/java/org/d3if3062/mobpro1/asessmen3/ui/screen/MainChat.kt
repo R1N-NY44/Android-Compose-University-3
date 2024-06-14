@@ -74,6 +74,7 @@ import org.d3if3062.mobpro1.asessmen3.R
 import org.d3if3062.mobpro1.asessmen3.system.database.SystemViewModel
 import org.d3if3062.mobpro1.asessmen3.system.database.model.ApiProfile
 import org.d3if3062.mobpro1.asessmen3.system.database.model.ChatList
+import org.d3if3062.mobpro1.asessmen3.system.network.ChatAPI
 import org.d3if3062.mobpro1.asessmen3.ui.component.getCroppedImage
 import org.d3if3062.mobpro1.asessmen3.ui.widgets.ImageDialog
 import kotlin.math.round
@@ -141,9 +142,10 @@ fun PublicChat(systemViewModel: SystemViewModel, apiProfile: List<ApiProfile>, m
                     IconButton(
                         onClick = {
                             apiProfile.firstOrNull()?.let { profile ->
-                                systemViewModel.sendChat(profile, textState)
+                                systemViewModel.sendChat(profile, textState, bitmap)
                             }
                             textState = ""
+                            shownImage = false
                         },
                     ) {
                         Icon(
@@ -157,7 +159,7 @@ fun PublicChat(systemViewModel: SystemViewModel, apiProfile: List<ApiProfile>, m
     ) { padding ->
         Modifier.padding(padding)
         Column(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -244,17 +246,10 @@ fun SentMessageBox(chat: ChatList) {
                 if (chat.image.isNotEmpty()) {
                     SubcomposeAsyncImage(
                         model = ImageRequest.Builder(LocalContext.current)
-                            .data(chat.image)
+                            .data(ChatAPI.imgUrl(chat.image))
                             .crossfade(true)
                             .build(),
                         error = {painterResource(id = R.drawable.profile_circle)},
-                        /*loading = {
-                            CircularProgressIndicator(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .padding(8.dp)
-                            )
-                        },*/
                         contentDescription = null,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -268,6 +263,7 @@ fun SentMessageBox(chat: ChatList) {
                     text = chat.text,
                     fontSize = 16.sp,
                 )
+                Text(text = chat.image)
             }
         }
     }
@@ -283,7 +279,8 @@ fun ReceivedMessageBox(chat: ChatList) {
     ) {
         AsyncImage(
             modifier = Modifier
-                .size(30.dp).clip(shape = RoundedCornerShape(8.dp))
+                .size(30.dp)
+                .clip(shape = RoundedCornerShape(8.dp))
                 .background(Color.Gray),
             model = ImageRequest.Builder(LocalContext.current)
                 .data(chat.photoUrl)
