@@ -75,6 +75,7 @@ fun BaseApp(
             topBar = {
                 TopAppBarWidget(
                     title = stringResource(id = R.string.app_name),
+                    apiProfile = apiProfile,
                     appTheme = appTheme,
                     showDialog = showDialog,
                     onShowDialogChange = { showDialog = it },
@@ -88,19 +89,6 @@ fun BaseApp(
             bottomBar = {
                 //BottomBarWidget(navController)
             },
-            /*floatingActionButton = {
-                IconButton(
-                    onClick = {
-                        apiProfile?.firstOrNull()?.let { profile ->
-                            systemViewModel.sendChat(profile, "test")
-                        }
-                    },
-                ) {
-                    Icon(imageVector = Icons.Filled.Send, contentDescription = "Send Message")
-                }
-            }*/
-
-
         ) { paddingValues ->
             Modifier.padding(paddingValues)
             NavigationGraph(navController, apiProfile, modifier = Modifier.padding(paddingValues))
@@ -119,6 +107,7 @@ fun BaseApp(
                 ProfilDialog(user = user, onDismissRequest = { showDialog = false }) {
                     CoroutineScope(Dispatchers.IO).launch {
                         signOut(context, userStore)
+                        systemViewModel.logOut()
                     }
                     showDialog = false
                 }
@@ -128,12 +117,9 @@ fun BaseApp(
             if (user.email.isNotEmpty()) {
                 systemViewModel.LogIn(user)
             }
+
         }
     }
-}
-
-fun gate(): Unit {
-
 }
 
 @Preview(showBackground = true)

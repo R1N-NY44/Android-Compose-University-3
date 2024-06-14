@@ -37,7 +37,7 @@ class SystemViewModel : ViewModel() {
         viewModelScope.launch {
             while (true) {
                 getChat()
-                delay(5000) // Poll every 5 seconds
+                delay(300000) // Auto Poll every 5 Minutes
             }
         }
     }
@@ -55,6 +55,21 @@ class SystemViewModel : ViewModel() {
             }
         }
     }
+
+    suspend fun logOut() {
+        delay(1500)
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // Reset APIProfile_data to null or an empty list
+                APIProfile_data.postValue(emptyList())
+                Log.d("MainViewModel", "[Profile]Logout successful")
+            } catch (e: Exception) {
+                Log.e("MainViewModel", "[Profile]Logout error: ${e.message}")
+            }
+        }
+    }
+
+
     ////////////////////////////////////////////////////////////////////////////////////////
     suspend fun getChat() {
         withContext(Dispatchers.IO) {

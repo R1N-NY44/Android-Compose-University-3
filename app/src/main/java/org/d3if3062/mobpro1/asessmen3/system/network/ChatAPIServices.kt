@@ -10,7 +10,7 @@ import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.POST
 
-private const val BASE_URL = "https://ghastly-delicate-dragon.ngrok-free.app/link/files/"
+private const val BASE_URL = "https://fenris-api-host.000webhostapp.com/files/"
 
 private val moshi = Moshi.Builder()
     .add(KotlinJsonAdapterFactory())
@@ -27,7 +27,7 @@ data class ChatResponse(
 interface ChatServices {
 
     @FormUrlEncoded
-    @POST("AddChat.php")
+    @POST("addChat.php")
     suspend fun addChat(
         @Field("user_id") userId: String,
         @Field("name") name: String,
@@ -36,7 +36,7 @@ interface ChatServices {
         @Field("image") image: String?
     ): ChatResponse
 
-    @GET("GetChat.php")
+    @GET("getChat.php")
     suspend fun getChats(): ChatResponse
 }
 
