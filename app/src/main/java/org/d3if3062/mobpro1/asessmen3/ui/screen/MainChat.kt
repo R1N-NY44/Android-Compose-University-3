@@ -2,15 +2,20 @@ package org.d3if3062.mobpro1.asessmen3.ui.screen
 
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.util.Log
+import android.view.RoundedCorner
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -30,6 +35,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -49,6 +55,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
@@ -61,11 +68,15 @@ import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import com.canhub.cropper.CropImageContract
+import com.canhub.cropper.CropImageContractOptions
+import com.canhub.cropper.CropImageOptions
 import org.d3if3062.mobpro1.asessmen3.R
 import org.d3if3062.mobpro1.asessmen3.system.database.SystemViewModel
 import org.d3if3062.mobpro1.asessmen3.system.database.model.ApiProfile
 import org.d3if3062.mobpro1.asessmen3.system.database.model.ChatList
 import org.d3if3062.mobpro1.asessmen3.ui.component.getCroppedImage
+import org.d3if3062.mobpro1.asessmen3.ui.widgets.ImageDialog
+import kotlin.math.round
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,10 +84,11 @@ fun PublicChat(systemViewModel: SystemViewModel, apiProfile: List<ApiProfile>, m
 //    val apiProfile by systemViewModel.profileData.observeAsState(initial = emptyList())
     val context = LocalContext.current
 
-    var bitmap: Bitmap? by remember { mutableStateOf(null) }
+    var shownImage by rememberSaveable { mutableStateOf(false) }
+    var bitmap: Bitmap? by rememberSaveable { mutableStateOf(null) }
     val launcher = rememberLauncherForActivityResult(contract = CropImageContract()) {
         bitmap = getCroppedImage(context.contentResolver, it)
-        //if (bitmap != null) shownHewanDialog = true
+        if (bitmap != null) shownImage = true
     }
 
     var textState by rememberSaveable { mutableStateOf("") }
@@ -85,10 +97,11 @@ fun PublicChat(systemViewModel: SystemViewModel, apiProfile: List<ApiProfile>, m
         bottomBar = {
             BottomAppBar(
                 containerColor = MaterialTheme.colorScheme.surface,
-                /*modifier = Modifier.padding(8.dp)*/
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
@@ -110,8 +123,14 @@ fun PublicChat(systemViewModel: SystemViewModel, apiProfile: List<ApiProfile>, m
                     // IconButton with 15% width each
                     IconButton(
                         onClick = {
-
-
+                            val options = CropImageContractOptions(
+                                null, CropImageOptions(
+                                    imageSourceIncludeGallery = true,
+                                    imageSourceIncludeCamera = true,
+                                    fixAspectRatio = true
+                                )
+                            )
+                            launcher.launch(options)
                         },
                     ) {
                         Icon(
@@ -127,23 +146,43 @@ fun PublicChat(systemViewModel: SystemViewModel, apiProfile: List<ApiProfile>, m
                             textState = ""
                         },
                     ) {
-                        Icon(imageVector = Icons.Filled.Send, contentDescription = "Send Message")
+                        Icon(
+                            imageVector = Icons.Filled.Send,
+                            contentDescription = "Send Message"
+                        )
                     }
                 }
             }
         }
     ) { padding ->
         Modifier.padding(padding)
-        ChatContent(
-            modifier = Modifier
+        Column(
+            modifier = modifier
                 .fillMaxSize()
                 .padding(padding),
-            systemViewModel = systemViewModel,
-            apiProfile
-        )
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Bottom
+        ) {
+            ChatContent(
+                modifier = Modifier
+                    .fillMaxSize(),
+                systemViewModel = systemViewModel,
+                apiProfile
+            )
+            if (shownImage) {
+                Image(
+                    //painter = painterResource(id = R.drawable.broken_img),
+                    bitmap = bitmap!!.asImageBitmap(),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
+                )
+            }
+        }
     }
-
 }
+
 
 @Composable
 fun ChatContent(
@@ -202,6 +241,29 @@ fun SentMessageBox(chat: ChatList) {
                     fontSize = 14.sp,
                 )
                 Spacer(modifier = Modifier.height(4.dp))
+                if (chat.image.isNotEmpty()) {
+                    SubcomposeAsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(chat.image)
+                            .crossfade(true)
+                            .build(),
+                        error = {painterResource(id = R.drawable.profile_circle)},
+                        /*loading = {
+                            CircularProgressIndicator(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .padding(8.dp)
+                            )
+                        },*/
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 250.dp)
+                            .widthIn(max = 250.dp)
+                            .clip(shape = RoundedCornerShape(10.dp))
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
                 Text(
                     text = chat.text,
                     fontSize = 16.sp,
@@ -221,7 +283,7 @@ fun ReceivedMessageBox(chat: ChatList) {
     ) {
         AsyncImage(
             modifier = Modifier
-                .size(30.dp)
+                .size(30.dp).clip(shape = RoundedCornerShape(8.dp))
                 .background(Color.Gray),
             model = ImageRequest.Builder(LocalContext.current)
                 .data(chat.photoUrl)
@@ -249,6 +311,22 @@ fun ReceivedMessageBox(chat: ChatList) {
                     fontSize = 14.sp,
                 )
                 Spacer(modifier = Modifier.height(4.dp))
+                if (chat.image.isNotEmpty()) {
+                    SubcomposeAsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(chat.image)
+                            .crossfade(true)
+                            .build(),
+                        error = {painterResource(id = R.drawable.profile_circle)},
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 250.dp)
+                            .widthIn(max = 250.dp)
+                            .clip(shape = RoundedCornerShape(10.dp))
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
                 Text(
                     text = chat.text,
                     fontSize = 16.sp,
