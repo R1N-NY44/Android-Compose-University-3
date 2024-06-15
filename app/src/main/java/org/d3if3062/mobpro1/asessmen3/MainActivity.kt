@@ -67,6 +67,7 @@ fun BaseApp(
     val appTheme by dataStore.layoutFlow.collectAsState(true)
     var showDialog by remember { mutableStateOf(false) }
     val user by userStore.userFlow.collectAsState(User())
+
     MobproAsessmen3Theme(darkTheme = appTheme) {
         Scaffold(
             modifier = Modifier

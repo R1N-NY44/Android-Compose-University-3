@@ -1,7 +1,11 @@
 package org.d3if3062.mobpro1.asessmen3.system.database
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.util.Log
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -21,6 +25,7 @@ import org.d3if3062.mobpro1.asessmen3.system.database.model.User
 import org.d3if3062.mobpro1.asessmen3.system.network.ChatAPI
 import org.d3if3062.mobpro1.asessmen3.system.network.ChatProfileAPI
 import org.d3if3062.mobpro1.asessmen3.system.network.ChatStatus
+import org.d3if3062.mobpro1.asessmen3.system.network.UserDataStore
 import java.io.ByteArrayOutputStream
 
 class SystemViewModel : ViewModel() {
@@ -35,11 +40,10 @@ class SystemViewModel : ViewModel() {
         private set
 
     init {
-//        getChat()
         startChatPolling()
     }
 
-    private fun startChatPolling() {
+    fun startChatPolling() {
         viewModelScope.launch {
             while (true) {
                 getChat()
@@ -53,7 +57,8 @@ class SystemViewModel : ViewModel() {
     fun LogIn(user: User) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                val response = ChatProfileAPI.retrofitService.addUser(user.email, user.name, user.photoUrl)
+                val response =
+                    ChatProfileAPI.retrofitService.addUser(user.email, user.name, user.photoUrl)
                 APIProfile_data.postValue(response.results)
                 Log.d("MainViewModel", "[Profile]Success:${response.results}")
             } catch (e: Exception) {
@@ -74,9 +79,10 @@ class SystemViewModel : ViewModel() {
             }
         }
     }
+
     ////////////////////////////////////////////////////////////////////////////////////////
-    suspend fun getChat() {
-        withContext(Dispatchers.IO) {
+    fun getChat() {
+        viewModelScope.launch(Dispatchers.IO) {
             chatStatus.value = ChatStatus.LOADING
             try {
                 val response = ChatAPI.retrofitService.getChats()
@@ -96,43 +102,6 @@ class SystemViewModel : ViewModel() {
             }
         }
     }
-    /*fun sendChat(profile: ApiProfile, text: String?, image: Bitmap?) {
-        viewModelScope.launch(Dispatchers.IO) {
-            chatStatus.value = ChatStatus.LOADING
-            try {
-                // Convert strings to RequestBody
-                val userId = profile.id.toRequestBody("text/plain".toMediaTypeOrNull())
-                val name = profile.name.toRequestBody("text/plain".toMediaTypeOrNull())
-                val photoUrl = profile.photoUrl.toRequestBody("text/plain".toMediaTypeOrNull())
-                val textPart = text?.toRequestBody("text/plain".toMediaTypeOrNull())
-
-                // Convert Bitmap to MultipartBody.Part
-                val imagePart: MultipartBody.Part? = image?.let {
-                    val byteArrayOutputStream = ByteArrayOutputStream()
-                    it.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
-                    val requestBody = RequestBody.create("image/jpeg".toMediaTypeOrNull(), byteArrayOutputStream.toByteArray())
-                    MultipartBody.Part.createFormData("image", "image.jpg", requestBody)
-                }
-
-                // Make API call
-                val response = ChatAPI.retrofitService.addChat(
-                    userId,
-                    name,
-                    photoUrl,
-                    textPart,
-                    imagePart
-                )
-
-                APIChat_data.postValue(response.results)
-                chatStatus.value = ChatStatus.SUCCESS
-                getChat() // Removed 'suspend' and 'withContext' from here
-                Log.d("MainViewModel", "[Chat]Success:${response.results}")
-            } catch (e: Exception) {
-                Log.e("MainViewModel", "[Chat]Error: ${e.message}")
-                chatStatus.value = ChatStatus.FAILED
-            }
-        }
-    }*/
 
     fun sendChat(profile: ApiProfile, text: String?, image: Bitmap?) {
         viewModelScope.launch(Dispatchers.IO) {
@@ -146,7 +115,10 @@ class SystemViewModel : ViewModel() {
                 val imagePart: MultipartBody.Part? = image?.let {
                     val byteArrayOutputStream = ByteArrayOutputStream()
                     it.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
-                    val requestBody = RequestBody.create("image/jpeg".toMediaTypeOrNull(), byteArrayOutputStream.toByteArray())
+                    val requestBody = RequestBody.create(
+                        "image/jpeg".toMediaTypeOrNull(),
+                        byteArrayOutputStream.toByteArray()
+                    )
                     MultipartBody.Part.createFormData("image", "image.jpg", requestBody)
                 }
 
@@ -169,50 +141,37 @@ class SystemViewModel : ViewModel() {
         }
     }
 
-
-
-
-
-}
-
-fun createRequestBody(value: String): RequestBody {
-    return RequestBody.create("text/plain".toMediaTypeOrNull(), value)
-}
-
-fun createMultipartBodyPart(name: String, bitmap: Bitmap): MultipartBody.Part {
-    val bos = ByteArrayOutputStream()
-    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos)
-    val byteArray = bos.toByteArray()
-    val requestFile = RequestBody.create("image/jpeg".toMediaTypeOrNull(), byteArray)
-    return MultipartBody.Part.createFormData(name, "image.jpg", requestFile)
-}
-
-/*fun getChat() {
+    fun deleteChat(id: String) {
         viewModelScope.launch(Dispatchers.IO) {
             chatStatus.value = ChatStatus.LOADING
             try {
-                val response = ChatAPI.retrofitService.getChats()
-                APIChat_data.postValue(response.results)
-                chatStatus.value = ChatStatus.SUCCESS
-                Log.d("MainViewModel", "[Chat]Success:${response.results}")
+                val response = ChatAPI.retrofitService.deleteChat(id)
+                // Pastikan respons tidak null
+                if (response != null) {
+                    // Memeriksa jika ada 'results' dalam respons
+                    if (response.results != null) {
+                        // Memperbarui data chat jika respons sesuai
+                        APIChat_data.postValue(response.results)
+                        chatStatus.value = ChatStatus.SUCCESS
+                        getChat()
+                        Log.d("MainViewModel", "[Chat] Success deleting chat with id: $id")
+                    } else {
+                        // Handle case when 'results' is missing in response
+                        Log.e("MainViewModel", "[Chat] Error: Results missing in response")
+                        chatStatus.value = ChatStatus.FAILED
+                    }
+                } else {
+                    // Handle case when response is null
+                    Log.e("MainViewModel", "[Chat] Error: Null response")
+                    chatStatus.value = ChatStatus.FAILED
+                }
             } catch (e: Exception) {
-                Log.e("MainViewModel", "[Chat]Error: ${e.message}")
+                Log.e("MainViewModel", "[Chat] Error deleting chat: ${e.message}")
                 chatStatus.value = ChatStatus.FAILED
             }
         }
-    }*/
-/*fun sendChat(profile: ApiProfile, text: String) {
-    viewModelScope.launch(Dispatchers.IO) {
-        chatStatus.value = ChatStatus.LOADING
-        try {
-            val response = ChatAPI.retrofitService.addChat(profile.id, profile.name, profile.photoUrl, text, null)
-            APIChat_data.postValue(response.results)
-            chatStatus.value = ChatStatus.SUCCESS
-            getChat()
-            Log.d("MainViewModel", "[Chat]Success:${response.results}")
-        } catch (e: Exception) {
-            Log.e("MainViewModel", "[Chat]Error: ${e.message}")
-            chatStatus.value = ChatStatus.FAILED
-        }
     }
-}*/
+
+
+
+}

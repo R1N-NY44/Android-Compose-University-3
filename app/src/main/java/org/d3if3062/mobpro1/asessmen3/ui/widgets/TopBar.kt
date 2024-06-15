@@ -1,6 +1,7 @@
 package org.d3if3062.mobpro1.asessmen3.ui.widgets
 
 import android.app.Activity
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -32,6 +33,7 @@ import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import org.d3if3062.mobpro1.asessmen3.R
 import org.d3if3062.mobpro1.asessmen3.system.database.model.ApiProfile
+import org.d3if3062.mobpro1.asessmen3.system.database.model.User
 import org.d3if3062.mobpro1.asessmen3.ui.component.Odading
 
 @OptIn(ExperimentalMaterial3Api::class)

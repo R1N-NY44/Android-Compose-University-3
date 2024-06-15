@@ -7,6 +7,7 @@ import okhttp3.RequestBody
 import org.d3if3062.mobpro1.asessmen3.system.database.model.ChatList
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Multipart
@@ -41,6 +42,14 @@ interface ChatServices {
 
     @GET("getChat.php")
     suspend fun getChats(): ChatResponse
+
+    @POST("deleteChat.php")
+    @FormUrlEncoded
+    suspend fun deleteChat(
+        @Field("id") id: String
+    ): ChatResponse
+
+
 }
 
 object ChatAPI {
